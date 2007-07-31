@@ -17,6 +17,7 @@ META.yml			# Will be created by "make dist"
 README
 t/00.load.t
 t/01.simple.t
+t/02.options.t
 t/perlcritic.t
 t/pod-coverage.t
 t/pod.t

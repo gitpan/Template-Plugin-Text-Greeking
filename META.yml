@@ -16,4 +16,4 @@ no_index:
 requires: 
   Text::Greeking: 0
   perl: 5.8.0
-version: 0.0.1
+version: 0.0.2

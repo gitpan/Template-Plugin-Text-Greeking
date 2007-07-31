@@ -6,15 +6,33 @@ use v5.8.0;
 
 use base "Template::Plugin";
 use Text::Greeking;
+use UNIVERSAL::require;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 sub new {
     my ($class, $context, $options) = @_;
-    my $plugin = sub {
-        Text::Greeking->new->generate()
+    my $greeking_class = "Text::Greeking";
+    $options ||= { lang => "en" };
+    return sub {
+        require YAML;
+        my $opt = { %$options, %{ $_[0] || {} } };
+
+        if ($opt) {
+            if ($opt->{lang} eq 'zh_TW') {
+                $greeking_class = "Text::Greeking::zh_TW";
+            }
+        }
+
+        $greeking_class->require();
+        my $g = $greeking_class->new;
+        for (qw(words paragraphs sentences)) {
+            if ($opt->{$_}) {
+                $g->$_(@{ $opt->{$_} })
+            }
+        }
+        $g->generate()
     };
-    return $plugin;
 }
 
 1; # Magic true value required at end of module
@@ -58,6 +76,27 @@ This is the constructor. Which allows users to write
     [% Text.Greeking() %]
 
 in template code.
+
+When doing so, you may pass the several parameters to tweak
+greeking class' output. Such as:
+
+    [% Text.Greeking(paragraphs => [1,5]) %]
+
+The available options keys are "words", "sentences", and "paragraphs".
+The value to these 3 keys should be an array (in the notation of array
+ref) of 2 numbers. The first number means the minium, the second of
+maximum. The example above is just the same as:
+
+    my $greeing = Text::Greeking->new;
+    $greeking->paragraphs(1,5);
+
+Additionally, you may use alternative greeking classes in different
+languages. So far the only alternative option is Chinese. In this case
+you would say:
+
+    [% Text.Greeking(lang => "zh_TW") %]
+
+To use L<Text::Greeking::zh_TW> to generate Chinese lipsums.
 
 =back
 
